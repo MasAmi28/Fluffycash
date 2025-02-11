@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FluffyCash</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #fff8e1;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h2 {
+            color: #d35400;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            background: #ffcc80;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        .menu-item:hover {
+            background: #f39c12;
+        }
+
+        .menu-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            margin-right: 15px;
+        }
+
+        .menu-item .details {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .menu-item .details span {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .menu-item .quantity,
+        .menu-item .topping,
+        .menu-item .cream {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        select, input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 150px;
+        }
+
+        .order-btn {
+            background-color: #d35400;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        .order-btn:hover {
+            background-color: #e67e22;
+        }
+
+        .order-summary {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-summary ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .order-summary li {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .total-price {
+            font-weight: bold;
+            font-size: 20px;
+            margin-top: 15px;
+            text-align: center;
+            color: #d35400;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .footer a {
+            color: #d35400;
+            text-decoration: none;
+        }
+
+        .cancel-btn {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+    <script>
+        let orders = [];
+        let totalPrice = 0;
+        const pricePerItem = 25000;
+
+        function pesanItem(item, quantity, topping, cream) {
+            if (quantity > 0) {
+                let orderPrice = pricePerItem * quantity;
+                let order = {
+                    item: `${quantity} pcs ${item} - Topping: ${topping}, Selai: ${cream}`,
+                    price: orderPrice,
+                    id: new Date().getTime()
+                };
+                orders.push(order);
+                totalPrice += orderPrice;
+                updateOrderSummary();
+            } else {
+                alert("Jumlah pesanan harus lebih dari 0.");
+            }
+        }
+
+        function updateQuantity(item, operation) {
+            let qtyElement = document.getElementById(item + "-quantity");
+            let qty = parseInt(qtyElement.value);
+            if (operation === "increase") {
+                qty++;
+            } else if (operation === "decrease" && qty > 0) {
+                qty--;
+            }
+            qtyElement.value = qty;
+        }
+
+        function updateOrderSummary() {
+            let orderList = document.getElementById("order-list");
+            orderList.innerHTML = "";
+            if (orders.length > 0) {
+                orders.forEach(order => {
+                    let li = document.createElement("li");
+                    li.textContent = order.item;
+                    let cancelBtn = document.createElement("button");
+                    cancelBtn.textContent = "Batal";
+                    cancelBtn.className = "cancel-btn";
+                    cancelBtn.onclick = function () { cancelOrder(order.id); };
+                    li.appendChild(cancelBtn);
+                    orderList.appendChild(li);
+                });
+                let totalPriceElement = document.getElementById("total-price");
+                totalPriceElement.textContent = `Total: Rp${totalPrice.toLocaleString()}`;
+                document.getElementById("clear-orders-btn").style.display = "inline-block";
+            } else {
+                let li = document.createElement("li");
+                li.textContent = "Belum ada pesanan.";
+                orderList.appendChild(li);
+                let totalPriceElement = document.getElementById("total-price");
+                totalPriceElement.textContent = "Total: Rp0";
+                document.getElementById("clear-orders-btn").style.display = "none";
+            }
+        }
+
+        function cancelOrder(orderId) {
+            orders = orders.filter(order => order.id !== orderId);
+            totalPrice = orders.reduce((total, order) => total + order.price, 0);
+            updateOrderSummary();
+        }
+
+        function clearOrders() {
+            orders = [];
+            totalPrice = 0;
+            updateOrderSummary();
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>FluffyCash - Menu Souffle Pancake</h2>
+        
+        <div class="menu-item">
+            <img src="https://via.placeholder.com/100" alt="Souffle Pancake Coklat">
+            <div class="details">
+                <span>Souffle Pancake Coklat - Rp25.000</span>
+                <div class="quantity">
+                    <button class="order-btn" onclick="updateQuantity('chocolate', 'decrease')">-</button>
+                    <input id="chocolate-quantity" type="number" value="0" readonly />
+                    <button class="order-btn" onclick="updateQuantity('chocolate', 'increase')">+</button>
+                </div>
+                <div class="topping">
+                    <label for="chocolate-topping">Topping:</label>
+                    <select id="chocolate-topping">
+                        <option value="OREO">OREO</option>
+                        <option value="CHOCO CHIPS">CHOCO CHIPS</option>
+                        <option value="RAINBOW CHIP">RAINBOW CHIP</option>
+                        <option value="MARSHMELLOW">MARSHMELLOW</option>
+                        <option value="CARAMEL">CARAMEL</option>
+                        <option value="KAJU">KAJU</option>
+                        <option value="KACANG ALMOND">KACANG ALMOND</option>
+                        <option value="MILO">MILO</option>
+                    </select>
+                </div>
+                <div class="cream">
+                    <label for="chocolate-cream">Selai/Cream:</label>
+                    <select id="chocolate-cream">
+                        <option value="STRAWBERRY">STRAWBERRY</option>
+                        <option value="CAPUCINO">CAPUCINO</option>
+                        <option value="COKLAT">COKLAT</option>
+                        <option value="CHOCO CRUNCHY">CHOCO CRUNCHY</option>
+                        <option value="GREENTEA">GREENTEA</option>
+                        <option value="TARO">TARO</option>
+                        <option value="TIRAMISU">TIRAMISU</option>
+                        <option value="CHEESE">CHEESE</option>
+                    </select>
+                </div>
+                <button class="order-btn" onclick="pesanItem('Souffle Pancake Coklat', document.getElementById('chocolate-quantity').value, document.getElementById('chocolate-topping').value, document.getElementById('chocolate-cream').value)">Pesan</button>
+            </div>
+        </div>
+        
+        <div class="menu-item">
+            <img src="https://via.placeholder.com/100" alt="Souffle Pancake Strawberry">
+            <div class="details">
+                <span>Souffle Pancake Strawberry - Rp25.000</span>
+                <div class="quantity">
+                    <button class="order-btn" onclick="updateQuantity('strawberry', 'decrease')">-</button>
+                    <input id="strawberry-quantity" type="number" value="0" readonly />
+                    <button class="order-btn" onclick="updateQuantity('strawberry', 'increase')">+</button>
+                </div>
+                <div class="topping">
+                    <label for="strawberry-topping">Topping:</label>
+                    <select id="strawberry-topping">
+                        <option value="OREO">OREO</option>
+                        <option value="CHOCO CHIPS">CHOCO CHIPS</option>
+                        <option value="RAINBOW CHIP">RAINBOW CHIP</option>
+                        <option value="MARSHMELLOW">MARSHMELLOW</option>
+                        <option value="CARAMEL">CARAMEL</option>
+                        <option value="KAJU">KAJU</option>
+                        <option value="KACANG ALMOND">KACANG ALMOND</option>
+                        <option value="MILO">MILO</option>
+                    </select>
+                </div>
+                <div class="cream">
+                    <label for="strawberry-cream">Selai/Cream:</label>
+                    <select id="strawberry-cream">
+                        <option value="STRAWBERRY">STRAWBERRY</option>
+                        <option value="CAPUCINO">CAPUCINO</option>
+                        <option value="COKLAT">COKLAT</option>
+                        <option value="CHOCO CRUNCHY">CHOCO CRUNCHY</option>
+                        <option value="GREENTEA">GREENTEA</option>
+                        <option value="TARO">TARO</option>
+                        <option value="TIRAMISU">TIRAMISU</option>
+                        <option value="CHEESE">CHEESE</option>
+                    </select>
+                </div>
+                <button class="order-btn" onclick="pesanItem('Souffle Pancake Strawberry', document.getElementById('strawberry-quantity').value, document.getElementById('strawberry-topping').value, document.getElementById('strawberry-cream').value)">Pesan</button>
+            </div>
+        </div>
+        
+        <div class="order-summary">
+            <h3>Pesanan Anda:</h3>
+            <ul id="order-list">
+                <li>Belum ada pesanan.</li>
+            </ul>
+            <div id="total-price" class="total-price">Total: Rp0</div>
+            <button id="clear-orders-btn" class="order-btn" style="display: none;" onclick="clearOrders()">Hapus Semua Pesanan</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Terima kasih telah memesan di <strong>FluffyCash</strong>! <a href="#">Kembali ke Beranda</a></p>
+    </div>
+</body>
+</html>
+
