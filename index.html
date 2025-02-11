@@ -3,49 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FluffyCash</title>
+    <title>FluffyCash - Souffle Pancakes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #fff8e1;
+            font-family: 'Poppins', sans-serif;
+            background-color: #fffaf3;
             margin: 0;
             padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             flex-direction: column;
+            min-height: 100vh;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             width: 100%;
             background: #ffffff;
             border-radius: 15px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            overflow: hidden;
+            text-align: center;
         }
 
         h2 {
-            color: #d35400;
-            text-align: center;
-            margin-bottom: 20px;
+            color: #e67e22;
+            font-weight: 600;
         }
 
         .menu-item {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            background: #ffcc80;
+            background: linear-gradient(135deg, #ffcc80, #ffb74d);
             margin-bottom: 20px;
             padding: 15px;
             border-radius: 10px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
-            transition: background 0.3s ease;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .menu-item:hover {
-            background: #f39c12;
+            transform: scale(1.05);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .menu-item img {
@@ -64,26 +67,37 @@
             display: block;
             margin-bottom: 5px;
             font-size: 18px;
+            font-weight: bold;
         }
 
-        .menu-item .quantity,
-        .menu-item .topping,
-        .menu-item .cream {
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        select, input {
+        .menu-item select, input, .menu-item button {
             padding: 8px;
             border-radius: 5px;
             border: 1px solid #ddd;
-            width: 150px;
+            margin-top: 5px;
+        }
+
+        .menu-item .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .quantity-btn:hover {
+            background: #d35400;
         }
 
         .order-btn {
-            background-color: #d35400;
+            background: #e67e22;
             color: white;
             padding: 10px 15px;
             border-radius: 5px;
@@ -94,15 +108,21 @@
         }
 
         .order-btn:hover {
-            background-color: #e67e22;
+            background: #d35400;
         }
 
         .order-summary {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 20px;
+            background: white;
+            padding: 15px;
             border-radius: 10px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            margin-top: 20px;
+        }
+
+        .order-summary h3 {
+            margin-bottom: 10px;
         }
 
         .order-summary ul {
@@ -112,16 +132,31 @@
         }
 
         .order-summary li {
-            margin-bottom: 10px;
             font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .cancel-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background: #c0392b;
         }
 
         .total-price {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 22px;
+            color: #e67e22;
             margin-top: 15px;
-            text-align: center;
-            color: #d35400;
         }
 
         .footer {
@@ -134,187 +169,123 @@
             color: #d35400;
             text-decoration: none;
         }
-
-        .cancel-btn {
-            background-color: #e74c3c;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .cancel-btn:hover {
-            background-color: #c0392b;
-        }
     </style>
-    <script>
-        let orders = [];
-        let totalPrice = 0;
-        const pricePerItem = 25000;
-
-        function pesanItem(item, quantity, topping, cream) {
-            if (quantity > 0) {
-                let orderPrice = pricePerItem * quantity;
-                let order = {
-                    item: `${quantity} pcs ${item} - Topping: ${topping}, Selai: ${cream}`,
-                    price: orderPrice,
-                    id: new Date().getTime()
-                };
-                orders.push(order);
-                totalPrice += orderPrice;
-                updateOrderSummary();
-            } else {
-                alert("Jumlah pesanan harus lebih dari 0.");
-            }
-        }
-
-        function updateQuantity(item, operation) {
-            let qtyElement = document.getElementById(item + "-quantity");
-            let qty = parseInt(qtyElement.value);
-            if (operation === "increase") {
-                qty++;
-            } else if (operation === "decrease" && qty > 0) {
-                qty--;
-            }
-            qtyElement.value = qty;
-        }
-
-        function updateOrderSummary() {
-            let orderList = document.getElementById("order-list");
-            orderList.innerHTML = "";
-            if (orders.length > 0) {
-                orders.forEach(order => {
-                    let li = document.createElement("li");
-                    li.textContent = order.item;
-                    let cancelBtn = document.createElement("button");
-                    cancelBtn.textContent = "Batal";
-                    cancelBtn.className = "cancel-btn";
-                    cancelBtn.onclick = function () { cancelOrder(order.id); };
-                    li.appendChild(cancelBtn);
-                    orderList.appendChild(li);
-                });
-                let totalPriceElement = document.getElementById("total-price");
-                totalPriceElement.textContent = `Total: Rp${totalPrice.toLocaleString()}`;
-                document.getElementById("clear-orders-btn").style.display = "inline-block";
-            } else {
-                let li = document.createElement("li");
-                li.textContent = "Belum ada pesanan.";
-                orderList.appendChild(li);
-                let totalPriceElement = document.getElementById("total-price");
-                totalPriceElement.textContent = "Total: Rp0";
-                document.getElementById("clear-orders-btn").style.display = "none";
-            }
-        }
-
-        function cancelOrder(orderId) {
-            orders = orders.filter(order => order.id !== orderId);
-            totalPrice = orders.reduce((total, order) => total + order.price, 0);
-            updateOrderSummary();
-        }
-
-        function clearOrders() {
-            orders = [];
-            totalPrice = 0;
-            updateOrderSummary();
-        }
-    </script>
 </head>
 <body>
     <div class="container">
         <h2>FluffyCash - Menu Souffle Pancake</h2>
         
+        <input type="text" id="buyer-name" placeholder="Masukkan Nama Pembeli">
+
         <div class="menu-item">
             <img src="https://via.placeholder.com/100" alt="Souffle Pancake Coklat">
             <div class="details">
                 <span>Souffle Pancake Coklat - Rp25.000</span>
-                <div class="quantity">
-                    <button class="order-btn" onclick="updateQuantity('chocolate', 'decrease')">-</button>
-                    <input id="chocolate-quantity" type="number" value="0" readonly />
-                    <button class="order-btn" onclick="updateQuantity('chocolate', 'increase')">+</button>
+                <div class="quantity-controls">
+                    <button class="quantity-btn" onclick="adjustQuantity(this, -1)">-</button>
+                    <input type="number" min="0" value="0">
+                    <button class="quantity-btn" onclick="adjustQuantity(this, 1)">+</button>
                 </div>
-                <div class="topping">
-                    <label for="chocolate-topping">Topping:</label>
-                    <select id="chocolate-topping">
-                        <option value="OREO">OREO</option>
-                        <option value="CHOCO CHIPS">CHOCO CHIPS</option>
-                        <option value="RAINBOW CHIP">RAINBOW CHIP</option>
-                        <option value="MARSHMELLOW">MARSHMELLOW</option>
-                        <option value="CARAMEL">CARAMEL</option>
-                        <option value="KAJU">KAJU</option>
-                        <option value="KACANG ALMOND">KACANG ALMOND</option>
-                        <option value="MILO">MILO</option>
-                    </select>
-                </div>
-                <div class="cream">
-                    <label for="chocolate-cream">Selai/Cream:</label>
-                    <select id="chocolate-cream">
-                        <option value="STRAWBERRY">STRAWBERRY</option>
-                        <option value="CAPUCINO">CAPUCINO</option>
-                        <option value="COKLAT">COKLAT</option>
-                        <option value="CHOCO CRUNCHY">CHOCO CRUNCHY</option>
-                        <option value="GREENTEA">GREENTEA</option>
-                        <option value="TARO">TARO</option>
-                        <option value="TIRAMISU">TIRAMISU</option>
-                        <option value="CHEESE">CHEESE</option>
-                    </select>
-                </div>
-                <button class="order-btn" onclick="pesanItem('Souffle Pancake Coklat', document.getElementById('chocolate-quantity').value, document.getElementById('chocolate-topping').value, document.getElementById('chocolate-cream').value)">Pesan</button>
+                <select>
+                    <option>Topping: OREO</option>
+                    <option>Topping: CARAMEL</option>
+                    <option>Topping: MARSHMELLOW</option>
+                </select>
+                <select>
+                    <option>Selai: COKLAT</option>
+                    <option>Selai: STRAWBERRY</option>
+                    <option>Selai: GREENTEA</option>
+                </select>
+                <button class="order-btn" onclick="addToOrder(this)">Pesan</button>
             </div>
         </div>
-        
-        <div class="menu-item">
-            <img src="https://via.placeholder.com/100" alt="Souffle Pancake Strawberry">
-            <div class="details">
-                <span>Souffle Pancake Strawberry - Rp25.000</span>
-                <div class="quantity">
-                    <button class="order-btn" onclick="updateQuantity('strawberry', 'decrease')">-</button>
-                    <input id="strawberry-quantity" type="number" value="0" readonly />
-                    <button class="order-btn" onclick="updateQuantity('strawberry', 'increase')">+</button>
-                </div>
-                <div class="topping">
-                    <label for="strawberry-topping">Topping:</label>
-                    <select id="strawberry-topping">
-                        <option value="OREO">OREO</option>
-                        <option value="CHOCO CHIPS">CHOCO CHIPS</option>
-                        <option value="RAINBOW CHIP">RAINBOW CHIP</option>
-                        <option value="MARSHMELLOW">MARSHMELLOW</option>
-                        <option value="CARAMEL">CARAMEL</option>
-                        <option value="KAJU">KAJU</option>
-                        <option value="KACANG ALMOND">KACANG ALMOND</option>
-                        <option value="MILO">MILO</option>
-                    </select>
-                </div>
-                <div class="cream">
-                    <label for="strawberry-cream">Selai/Cream:</label>
-                    <select id="strawberry-cream">
-                        <option value="STRAWBERRY">STRAWBERRY</option>
-                        <option value="CAPUCINO">CAPUCINO</option>
-                        <option value="COKLAT">COKLAT</option>
-                        <option value="CHOCO CRUNCHY">CHOCO CRUNCHY</option>
-                        <option value="GREENTEA">GREENTEA</option>
-                        <option value="TARO">TARO</option>
-                        <option value="TIRAMISU">TIRAMISU</option>
-                        <option value="CHEESE">CHEESE</option>
-                    </select>
-                </div>
-                <button class="order-btn" onclick="pesanItem('Souffle Pancake Strawberry', document.getElementById('strawberry-quantity').value, document.getElementById('strawberry-topping').value, document.getElementById('strawberry-cream').value)">Pesan</button>
-            </div>
-        </div>
-        
+
         <div class="order-summary">
             <h3>Pesanan Anda:</h3>
-            <ul id="order-list">
-                <li>Belum ada pesanan.</li>
-            </ul>
-            <div id="total-price" class="total-price">Total: Rp0</div>
-            <button id="clear-orders-btn" class="order-btn" style="display: none;" onclick="clearOrders()">Hapus Semua Pesanan</button>
+            <div id="order-list">Belum ada pesanan.</div>
         </div>
     </div>
 
     <div class="footer">
         <p>Terima kasih telah memesan di <strong>FluffyCash</strong>! <a href="#">Kembali ke Beranda</a></p>
     </div>
+
+    <script>
+        let orders = {};
+
+        function adjustQuantity(button, change) {
+            const input = button.parentElement.querySelector('input');
+            let value = parseInt(input.value) + change;
+            input.value = value < 0 ? 0 : value;
+        }
+
+        function addToOrder(button) {
+            const buyerName = document.getElementById('buyer-name').value.trim();
+            if (!buyerName) {
+                alert('Masukkan nama pembeli terlebih dahulu!');
+                return;
+            }
+
+            const itemDetails = button.parentElement;
+            const itemName = itemDetails.querySelector('span').innerText;
+            const quantity = parseInt(itemDetails.querySelector('input').value);
+            if (quantity === 0) {
+                alert('Masukkan jumlah yang valid!');
+                return;
+            }
+
+            const topping = itemDetails.querySelectorAll('select')[0].value;
+            const selai = itemDetails.querySelectorAll('select')[1].value;
+            const price = 25000 * quantity;
+
+            if (!orders[buyerName]) {
+                orders[buyerName] = [];
+            }
+
+            orders[buyerName].push({ itemName, topping, selai, quantity, price });
+            updateOrderList();
+        }
+
+        function updateOrderList() {
+            const orderListDiv = document.getElementById('order-list');
+            orderListDiv.innerHTML = '';
+
+            for (const buyer in orders) {
+                const buyerDiv = document.createElement('div');
+                buyerDiv.innerHTML = `<h4>${buyer}</h4>`;
+                let total = 0;
+
+                const ul = document.createElement('ul');
+                orders[buyer].forEach((order, index) => {
+                    total += order.price;
+                    const li = document.createElement('li');
+                    li.innerHTML = `${order.itemName} (${order.quantity}) - Rp${order.price.toLocaleString()} <button class="cancel-btn" onclick="cancelOrder('${buyer}', ${index})">Batalkan</button>`;
+                    ul.appendChild(li);
+                });
+
+                buyerDiv.appendChild(ul);
+                buyerDiv.innerHTML += `<div class="total-price">Total: Rp${total.toLocaleString()}</div>`;
+                buyerDiv.innerHTML += `<button class="cancel-btn" onclick="cancelAllOrders('${buyer}')">Batalkan Semua Pesanan</button>`;
+                orderListDiv.appendChild(buyerDiv);
+            }
+
+            if (Object.keys(orders).length === 0) {
+                orderListDiv.innerHTML = 'Belum ada pesanan.';
+            }
+        }
+
+        function cancelOrder(buyer, index) {
+            orders[buyer].splice(index, 1);
+            if (orders[buyer].length === 0) {
+                delete orders[buyer];
+            }
+            updateOrderList();
+        }
+
+        function cancelAllOrders(buyer) {
+            delete orders[buyer];
+            updateOrderList();
+        }
+    </script>
 </body>
 </html>
-
